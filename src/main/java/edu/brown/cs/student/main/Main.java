@@ -28,7 +28,7 @@ public final class Main {
 
   // use port 4567 by default when running server
   private static final int DEFAULT_PORT = 4567;
-
+  private MathBot _mb;
   /**
    * The initial method called when execution begins.
    *
@@ -42,6 +42,7 @@ public final class Main {
 
   private Main(String[] args) {
     this.args = args;
+    _mb = new MathBot;
   }
 
   private void run() {
@@ -63,13 +64,27 @@ public final class Main {
     // TODO: Add your REPL here!
     try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
       String input;
+      double ans = 0.0;
       while ((input = br.readLine()) != null) {
         try {
           input = input.trim();
           String[] arguments = input.split(" ");
-          System.out.println(arguments[0]);
+          //System.out.println(arguments[0]);
+          System.out.println("check");
+
           // TODO: complete your REPL by adding commands for addition "add" and subtraction
           //  "subtract"
+          double n1 = Double.parseDouble(arguments[1]);
+          double n2 = Double.pargeDouble(arguments[2]);
+
+          if(input.equals(add)){
+            ans = _mb.add(n1, n2);
+            System.out.println(ans);
+          }
+          else if (input.equals(subtract)){
+            ans = _mb.subtract(n1, n2);
+            System.out.println(ans);
+          }
         } catch (Exception e) {
           // e.printStackTrace();
           System.out.println("ERROR: We couldn't process your input");
