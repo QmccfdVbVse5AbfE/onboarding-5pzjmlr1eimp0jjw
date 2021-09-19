@@ -99,6 +99,9 @@ public final class Main {
           else if ((_curData != null) && (arguments[0].equals("naive_neighbors"))){
             this.naive_neighbors(_curData, arguments);
           }
+          else {
+            System.out.println("ERROR: Invalid Command");
+          }
 
         } catch (Exception e) {
           // e.printStackTrace();
@@ -222,28 +225,34 @@ public final class Main {
         arguments[2] = removedQuotes;
         index = this.findIndex(arguments[2], strArrList);
 
+        for(star s: strArrList){
+          double temp;
+          temp = this.findDis(strArrList.get(index), s);
+          result.put(s, temp);
+          s.setDis(temp);
+
+        }
+
       } else if(arguments.length == 5){
 
-        index = this.findIndexFromCords(Double.parseDouble(arguments[2]),Double.parseDouble(arguments[3]),Double.parseDouble(arguments[4]), strArrList);
+        for(star s: strArrList){
+          double temp2;
+          temp2 = this.approxDis(s, Double.parseDouble(arguments[2]), Double.parseDouble(arguments[3]), Double.parseDouble(arguments[4]));
+          result.put(s, temp2);
+          s.setDis(temp2);
+
+        }
 
       } else {
           System.out.println("Invalid Input: Please follow the format");
           return;
         }
 
-      for(star s: strArrList){
-        double temp;
-        temp = this.findDis(strArrList.get(index), s);
-        result.put(s, temp);
-        s.setDis(temp);
-
-      }
-
       HashMapSort HMS = new HashMapSort(result);
       Iterator<Map.Entry<star, Double>> hmIterator = HMS.hashSort();
 
       int i = 0;
-      hmIterator.next();
+
       while((hmIterator.hasNext()) && (i < Integer.parseInt(arguments[1]))){
         star curStar = hmIterator.next().getKey();
         if(arguments.length == 3) {
@@ -252,12 +261,16 @@ public final class Main {
             i++;
           }
         } else {
-          System.out.println(hmIterator.next().getKey().getID());
+          System.out.println(curStar.getID());
           i++;
         }
       }
     }
-
+  public double approxDis(star s1, Double x, Double y, Double z){
+    double ans = 0.0;
+    ans = Math.pow((s1.getX() - x),2) + Math.pow((s1.getY() - y),2) + Math.pow((s1.getZ() - z),2);
+    return ans;
+  }
 
   public double findDis(star s1, star s2){
     double ans = 0.0;
@@ -274,14 +287,15 @@ public final class Main {
     } return index;
   }
 
-  public int findIndexFromCords(double x, double y, double z, List<star> st){
-    int index = -1;
-    for (star str: st){
-      if((x == str.getX()) && (y == str.getY()) && (z == str.getZ())){
-        index = st.indexOf(str);
-      }
-    } return index;
-  }
+//  public int findIndexFromCords(Double x, Double y, Double z, List<star> st){
+//    int index = -1;
+//    for (star str: st){
+//      if((x == str.getX()) && (y == str.getY()) && (z == str.getZ())){
+//        index = st.indexOf(str);
+//        System.out.println(index);
+//      }
+//    } return index;
+//  }
 
   public String removeQuotes(String inputStr){
     String returnStr;
