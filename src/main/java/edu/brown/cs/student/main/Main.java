@@ -7,6 +7,13 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.lang.*;
+import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -20,6 +27,7 @@ import spark.Response;
 import spark.Spark;
 import spark.TemplateViewRoute;
 import spark.template.freemarker.FreeMarkerEngine;
+import java.util.LinkedHashMap;
 
 /**
  * The Main class of our project. This is where execution begins.
@@ -70,21 +78,25 @@ public final class Main {
         try {
           input = input.trim();
           String[] arguments = input.split(" ");
-          System.out.println(arguments[0]);
 
           // TODO: complete your REPL by adding commands for addition "add" and subtraction
           //  "subtract"
 
-          double n1 = Double.parseDouble(arguments[1]);
-          double n2 = Double.parseDouble(arguments[2]);
-
           if(arguments[0].equals("add")){
+            double n1 = Double.parseDouble(arguments[1]);
+            double n2 = Double.parseDouble(arguments[2]);
             ans = _mb.add(n1, n2);
             System.out.println(ans);
           }
           else if (arguments[0].equals("subtract")){
+            double n1 = Double.parseDouble(arguments[1]);
+            double n2 = Double.parseDouble(arguments[2]);
             ans = _mb.subtract(n1, n2);
             System.out.println(ans);
+          }
+          else if (arguments[0].equals("stars")){
+            File file = new File(arguments[1]);
+            this.stars(file);
           }
         } catch (Exception e) {
           // e.printStackTrace();
@@ -165,5 +177,105 @@ public final class Main {
 
       return new ModelAndView(variables, "main.ftl");
     }
+  }
+  public String[] stars(File file){
+
+    String line;
+    List<star> strArr = new ArrayList<star>();
+    try {
+
+      BufferedReader fileR = new BufferedReader(new FileReader(file));
+      int counter = 0;
+      while ((line = fileR.readLine()) != null) {
+        System.out.println(line);
+        line = line.trim();
+        String[] strs = line.split(",");
+
+        if(counter >= 1) {
+          star newStar = new star(Integer.parseInt(strs[0]), strs[1], Double.parseDouble(strs[2]),
+              Double.parseDouble(strs[3]), Double.parseDouble(strs[4]));
+          strArr.add(newStar);
+        }
+        counter++;
+      }
+    } catch(Exception e){
+      e.printStackTrace();
+    }
+
+    try {
+
+      int index;
+      BufferedReader br2 = new BufferedReader(new InputStreamReader(System.in));
+      String input = br2.readLine();
+      input = input.trim();
+      String[] arg = input.split(" ");
+      HashMap<star, Double> result = new HashMap<>();
+
+
+      if(arg.length == 3){
+        String removedQuotes;
+        removedQuotes = this.removeQuotes(arg[2]);
+        arg[2] = removedQuotes;
+        index = this.findIndex(arg[2], strArr);
+      } else {
+        index = this.findIndexFromCords(Double.parseDouble(arg[2]),Double.parseDouble(arg[3]),Double.parseDouble(arg[4]), strArr);
+      }
+
+      for(star s: strArr){
+        double temp;
+        temp = this.findDis(strArr.get(index), s);
+        result.put(s, temp);
+        s.setDis(temp);
+
+      }
+
+      HashMapSort HMS = new HashMapSort(result);
+     // LinkedHashMap<star, Double> LHM = new LinkedHashMap<>();
+      //LHM = HMS.hashSort();
+      Iterator<Map.Entry<star, Double>> hmIterator = HMS.hashSort();
+      int tracker = 0;
+      int i = 0;
+      hmIterator.next();
+      while((hmIterator.hasNext()) && (i < Integer.parseInt(arg[1]) + 2)){
+        if(tracker >= 2){
+          System.out.println(hmIterator.next().getKey().getID());
+        }
+        tracker++;
+        i++;
+      }
+    }
+    catch(Exception e){
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public double findDis(star s1, star s2){
+    double ans = 0.0;
+    ans = Math.pow((s1.getX() - s2.getX()),2) + Math.pow((s1.getY() - s2.getY()),2) + Math.pow((s1.getZ() - s2.getZ()),2);
+    return ans;
+  }
+
+  public int findIndex(String target, List<star> st){
+    int index = -1;
+    for (star str: st){
+      if(str.getName().toString().equals(target.toString())){
+        index = st.indexOf(str);
+      }
+    } return index;
+  }
+
+  public int findIndexFromCords(double x, double y, double z, List<star> st){
+    int index = -1;
+    for (star str: st){
+      if((x == str.getX()) && (y == str.getY()) && (z == str.getZ())){
+        index = st.indexOf(str);
+      }
+    } return index;
+  }
+  public String removeQuotes(String inputStr){
+    String returnStr;
+    returnStr = inputStr.replace("\"", "");
+    return returnStr;
   }
 }
