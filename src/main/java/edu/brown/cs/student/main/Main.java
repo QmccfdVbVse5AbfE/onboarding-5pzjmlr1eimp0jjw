@@ -225,6 +225,12 @@ public final class Main {
         arguments[2] = removedQuotes;
         index = this.findIndex(arguments[2], strArrList);
 
+        if(!this.exceptionHandling(strArrList, arguments[2])){
+          return;
+        } else if (strArrList.size() == 1){
+          return;
+        }
+
         for(star s: strArrList){
           double temp;
           temp = this.findDis(strArrList.get(index), s);
@@ -287,15 +293,14 @@ public final class Main {
     } return index;
   }
 
-//  public int findIndexFromCords(Double x, Double y, Double z, List<star> st){
-//    int index = -1;
-//    for (star str: st){
-//      if((x == str.getX()) && (y == str.getY()) && (z == str.getZ())){
-//        index = st.indexOf(str);
-//        System.out.println(index);
-//      }
-//    } return index;
-//  }
+  public boolean exceptionHandling(List<star> strList, String targetName){
+    boolean exist = false;
+    for(star str: strList){
+      if(str.getName().equals(targetName)){
+        exist = true;
+      }
+    } return exist;
+  }
 
   public String removeQuotes(String inputStr){
     String returnStr;
