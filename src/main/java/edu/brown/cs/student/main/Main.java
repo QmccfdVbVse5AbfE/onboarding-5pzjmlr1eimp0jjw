@@ -37,6 +37,8 @@ public final class Main {
   // use port 4567 by default when running server
   private static final int DEFAULT_PORT = 4567;
   private MathBot _mb;
+  private List _curData;
+
   /**
    * The initial method called when execution begins.
    *
@@ -69,7 +71,6 @@ public final class Main {
       runSparkServer((int) options.valueOf("port"));
     }
 
-    // TODO: Add your REPL here!
     try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
       String input;
       double ans = 0.0;
@@ -78,9 +79,6 @@ public final class Main {
         try {
           input = input.trim();
           String[] arguments = input.split(" ");
-
-          // TODO: complete your REPL by adding commands for addition "add" and subtraction
-          //  "subtract"
 
           if(arguments[0].equals("add")){
             double n1 = Double.parseDouble(arguments[1]);
@@ -96,8 +94,12 @@ public final class Main {
           }
           else if (arguments[0].equals("stars")){
             File file = new File(arguments[1]);
-            this.stars(file);
+            _curData = this.stars(file);
           }
+          else if ((_curData != null) && (arguments[0].equals("naive_neighbors"))){
+            this.naive_neighbors(_curData, arguments);
+          }
+
         } catch (Exception e) {
           // e.printStackTrace();
           System.out.println("ERROR: We couldn't process your input");
@@ -178,7 +180,7 @@ public final class Main {
       return new ModelAndView(variables, "main.ftl");
     }
   }
-  public String[] stars(File file){
+  public List<star> stars(File file) {
 
     String line;
     List<star> strArr = new ArrayList<star>();
@@ -191,64 +193,71 @@ public final class Main {
         line = line.trim();
         String[] strs = line.split(",");
 
-        if(counter >= 1) {
+        if (counter >= 1) {
           star newStar = new star(Integer.parseInt(strs[0]), strs[1], Double.parseDouble(strs[2]),
               Double.parseDouble(strs[3]), Double.parseDouble(strs[4]));
           strArr.add(newStar);
         }
         counter++;
       }
-    } catch(Exception e){
-      e.printStackTrace();
-    }
 
-    try {
+    } catch (Exception e) {
+      e.printStackTrace();
+    } return strArr;
+  }
+
+  public void naive_neighbors(List<star> strArrList, String[] arguments){
 
       int index;
-      BufferedReader br2 = new BufferedReader(new InputStreamReader(System.in));
-      String input = br2.readLine();
-      input = input.trim();
-      String[] arg = input.split(" ");
       HashMap<star, Double> result = new HashMap<>();
 
-
-      if(arg.length == 3){
-        String removedQuotes;
-        removedQuotes = this.removeQuotes(arg[2]);
-        arg[2] = removedQuotes;
-        index = this.findIndex(arg[2], strArr);
-      } else {
-        index = this.findIndexFromCords(Double.parseDouble(arg[2]),Double.parseDouble(arg[3]),Double.parseDouble(arg[4]), strArr);
+      if(Integer.parseInt(arguments[1]) == 0){
+        return;
       }
 
-      for(star s: strArr){
+      if(arguments.length == 3){
+
+        String removedQuotes;
+        removedQuotes = this.removeQuotes(arguments[2]);
+        arguments[2] = removedQuotes;
+        index = this.findIndex(arguments[2], strArrList);
+
+      } else if(arguments.length == 5){
+
+        index = this.findIndexFromCords(Double.parseDouble(arguments[2]),Double.parseDouble(arguments[3]),Double.parseDouble(arguments[4]), strArrList);
+
+      } else {
+          System.out.println("Invalid Input: Please follow the format");
+          return;
+        }
+
+      for(star s: strArrList){
         double temp;
-        temp = this.findDis(strArr.get(index), s);
+        temp = this.findDis(strArrList.get(index), s);
         result.put(s, temp);
         s.setDis(temp);
 
       }
 
       HashMapSort HMS = new HashMapSort(result);
-     // LinkedHashMap<star, Double> LHM = new LinkedHashMap<>();
-      //LHM = HMS.hashSort();
       Iterator<Map.Entry<star, Double>> hmIterator = HMS.hashSort();
-      int tracker = 0;
+
       int i = 0;
       hmIterator.next();
-      while((hmIterator.hasNext()) && (i < Integer.parseInt(arg[1]) + 2)){
-        if(tracker >= 2){
+      while((hmIterator.hasNext()) && (i < Integer.parseInt(arguments[1]))){
+        star curStar = hmIterator.next().getKey();
+        if(arguments.length == 3) {
+          if (!curStar.getName().equals(arguments[2])){
+            System.out.println(curStar.getID());
+            i++;
+          }
+        } else {
           System.out.println(hmIterator.next().getKey().getID());
+          i++;
         }
-        tracker++;
-        i++;
       }
     }
-    catch(Exception e){
-      e.printStackTrace();
-    }
-    return null;
-  }
+
 
   public double findDis(star s1, star s2){
     double ans = 0.0;
@@ -273,6 +282,7 @@ public final class Main {
       }
     } return index;
   }
+
   public String removeQuotes(String inputStr){
     String returnStr;
     returnStr = inputStr.replace("\"", "");
