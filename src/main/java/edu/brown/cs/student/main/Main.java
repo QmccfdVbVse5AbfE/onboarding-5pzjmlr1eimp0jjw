@@ -96,7 +96,7 @@ public final class Main {
             File file = new File(arguments[1]);
             _curData = this.stars(file);
           }
-          else if ((_curData != null) && (arguments[0].equals("naive_neighbors"))){
+          else if ((_curData != null) && (arguments[0].equals("naive_neighbors"))){ //file must be read first
             this.naive_neighbors(_curData, arguments);
           }
           else {
@@ -183,6 +183,8 @@ public final class Main {
       return new ModelAndView(variables, "main.ftl");
     }
   }
+  /**file reading is done here
+   * @return ArrayList that contains the stars in data*/
   public List<star> stars(File file) {
 
     String line;
@@ -191,14 +193,13 @@ public final class Main {
 
       BufferedReader fileR = new BufferedReader(new FileReader(file));
       int counter = 0;
-      while ((line = fileR.readLine()) != null) {
-        System.out.println(line);
+      while ((line = fileR.readLine()) != null) {  //abstract out only the relevant parts of the input
         line = line.trim();
         String[] strs = line.split(",");
 
-        if (counter >= 1) {
+        if (counter >= 1) { //skipping first line as it does not contain any star info
           star newStar = new star(Integer.parseInt(strs[0]), strs[1], Double.parseDouble(strs[2]),
-              Double.parseDouble(strs[3]), Double.parseDouble(strs[4]));
+              Double.parseDouble(strs[3]), Double.parseDouble(strs[4]));  //create a new instance of star. Passing in as well all the coordinates info
           strArr.add(newStar);
         }
         counter++;
@@ -208,38 +209,38 @@ public final class Main {
       e.printStackTrace();
     } return strArr;
   }
-
+  /**naive_neighbors method is here*/
   public void naive_neighbors(List<star> strArrList, String[] arguments){
 
       int index;
       HashMap<star, Double> result = new HashMap<>();
 
-      if(Integer.parseInt(arguments[1]) == 0){
+      if(Integer.parseInt(arguments[1]) == 0){  //find zero star -> terminate
         return;
       }
 
-      if(arguments.length == 3){
+      if(arguments.length == 3){  //Pattern 1: naive_neighbors <k> <"name">
 
         String removedQuotes;
-        removedQuotes = this.removeQuotes(arguments[2]);
+        removedQuotes = this.removeQuotes(arguments[2]); //remove quotes from the star name passed in
         arguments[2] = removedQuotes;
         index = this.findIndex(arguments[2], strArrList);
 
-        if(!this.exceptionHandling(strArrList, arguments[2])){
+        if(!this.exceptionHandling(strArrList, arguments[2])){  //if the star is not in the data read previously
           return;
-        } else if (strArrList.size() == 1){
+        } else if (strArrList.size() == 1){    //if the starting star is the only star in the data
           return;
         }
 
         for(star s: strArrList){
           double temp;
-          temp = this.findDis(strArrList.get(index), s);
-          result.put(s, temp);
-          s.setDis(temp);
+          temp = this.findDis(strArrList.get(index), s);  //find the distance of each star from the starting star
+          result.put(s, temp);  //put it in a list
+          s.setDis(temp); //let star remember its distance
 
         }
 
-      } else if(arguments.length == 5){
+      } else if(arguments.length == 5){ //Pattern 2: naive_neighbors <k> <x> <y> <z>
 
         for(star s: strArrList){
           double temp2;
@@ -250,19 +251,19 @@ public final class Main {
         }
 
       } else {
-          System.out.println("Invalid Input: Please follow the format");
+          System.out.println("Invalid Input: Please follow the format");  //not conforming to the two formats!
           return;
         }
 
       HashMapSort HMS = new HashMapSort(result);
-      Iterator<Map.Entry<star, Double>> hmIterator = HMS.hashSort();
+      Iterator<Map.Entry<star, Double>> hmIterator = HMS.hashSort(); //here the sorted iterator is returned from HashMapSort class!
 
       int i = 0;
 
       while((hmIterator.hasNext()) && (i < Integer.parseInt(arguments[1]))){
         star curStar = hmIterator.next().getKey();
         if(arguments.length == 3) {
-          if (!curStar.getName().equals(arguments[2])){
+          if (!curStar.getName().equals(arguments[2])){ //do not print out the starting star!
             System.out.println(curStar.getID());
             i++;
           }
@@ -272,18 +273,21 @@ public final class Main {
         }
       }
     }
+
+  /**distance calculating equation for 5 inputs*/
   public double approxDis(star s1, Double x, Double y, Double z){
     double ans = 0.0;
     ans = Math.pow((s1.getX() - x),2) + Math.pow((s1.getY() - y),2) + Math.pow((s1.getZ() - z),2);
     return ans;
   }
-
+  /**distance calculating eqution for 3 inputs*/
   public double findDis(star s1, star s2){
     double ans = 0.0;
     ans = Math.pow((s1.getX() - s2.getX()),2) + Math.pow((s1.getY() - s2.getY()),2) + Math.pow((s1.getZ() - s2.getZ()),2);
     return ans;
   }
 
+  /**finds the index of the star passed in by iterating through the List and doing .equals with each element*/
   public int findIndex(String target, List<star> st){
     int index = -1;
     for (star str: st){
@@ -293,6 +297,7 @@ public final class Main {
     } return index;
   }
 
+  /**This method returns true if a star exits in the list passed in. Otherwise false*/
   public boolean exceptionHandling(List<star> strList, String targetName){
     boolean exist = false;
     for(star str: strList){
@@ -302,6 +307,7 @@ public final class Main {
     } return exist;
   }
 
+  /**removes quotes of the string passed in*/
   public String removeQuotes(String inputStr){
     String returnStr;
     returnStr = inputStr.replace("\"", "");
