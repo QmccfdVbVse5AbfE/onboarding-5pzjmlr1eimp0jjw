@@ -95,6 +95,7 @@ public final class Main {
           else if (arguments[0].equals("stars")){
             File file = new File(arguments[1]);
             _curData = this.stars(file);
+            System.out.println("Read " +  _curData.size() + " stars from " + file);
           }
           else if ((_curData != null) && (arguments[0].equals("naive_neighbors"))){ //file must be read first
             this.naive_neighbors(_curData, arguments);
@@ -204,6 +205,7 @@ public final class Main {
         }
         counter++;
       }
+
 
     } catch (Exception e) {
       e.printStackTrace();
