@@ -16,6 +16,9 @@ public class star{
     _id = id;
     _name = name;
   }
+  
+  // I like the usage of getters and setters to keep the star data itself safe.
+  
   public double getX(){
     return _myX;
   }
