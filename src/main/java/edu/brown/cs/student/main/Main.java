@@ -187,6 +187,8 @@ public final class Main {
   /**file reading is done here
    * @return ArrayList that contains the stars in data*/
   public List<star> stars(File file) {
+    
+    //Nice job breaking down the main methods.
 
     String line;
     List<star> strArr = new ArrayList<star>();
@@ -199,6 +201,7 @@ public final class Main {
         String[] strs = line.split(",");
 
         if (counter >= 1) { //skipping first line as it does not contain any star info
+          //this first line might want to be used to make sure it has the proper headings / is the right data.
           star newStar = new star(Integer.parseInt(strs[0]), strs[1], Double.parseDouble(strs[2]),
               Double.parseDouble(strs[3]), Double.parseDouble(strs[4]));  //create a new instance of star. Passing in as well all the coordinates info
           strArr.add(newStar);
@@ -280,6 +283,7 @@ public final class Main {
   public double approxDis(star s1, Double x, Double y, Double z){
     double ans = 0.0;
     ans = Math.pow((s1.getX() - x),2) + Math.pow((s1.getY() - y),2) + Math.pow((s1.getZ() - z),2);
+    //should the distance have to be square rooted?
     return ans;
   }
   /**distance calculating eqution for 3 inputs*/
